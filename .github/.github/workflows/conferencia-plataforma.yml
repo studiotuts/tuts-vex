@@ -1,0 +1,34 @@
+# Conferência automática da Plataforma TUTS (Etapa de Segurança S.9).
+# Vai no repositório github.com/studiotuts/tuts-vex, em .github/workflows/conferencia-plataforma.yml
+# (repositório público: os minutos do GitHub Actions são gratuitos). Precisa do segredo MONITOR_TOKEN
+# (Settings → Secrets and variables → Actions), o mesmo valor configurado no servidor (fly secrets).
+# Se alguma etapa falhar, o GitHub manda e-mail avisando que a conferência falhou.
+name: Conferência da Plataforma TUTS
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Servidor no ar
+        run: curl -fsS --retry 2 --retry-delay 15 --max-time 20 https://api.studiotuts.com.br/health
+
+      - name: Área do cliente e painel no ar
+        run: |
+          curl -fsS --retry 2 --retry-delay 15 --max-time 20 -o /dev/null https://conta.studiotuts.com.br/conta
+          curl -fsS --retry 2 --retry-delay 15 --max-time 20 -o /dev/null https://admin.studiotuts.com.br/painel
+
+      - name: Alertas (logins recusados e erros do servidor)
+        env:
+          TOKEN: ${{ secrets.MONITOR_TOKEN }}
+        run: |
+          r=$(curl -fsS --retry 2 --retry-delay 15 --max-time 20 -H "x-monitor-token: $TOKEN" https://api.studiotuts.com.br/monitor/alerts)
+          echo "$r"
+          echo "$r" | grep -q '"status":"OK"' || { echo "::error::ALERTA na Plataforma TUTS: $r"; exit 1; }
