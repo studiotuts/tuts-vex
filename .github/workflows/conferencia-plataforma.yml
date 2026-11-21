@@ -22,7 +22,7 @@ jobs:
 
       - name: Área do cliente e painel no ar
         run: |
-          curl -fsS --retry 2 --retry-delay 15 --max-time 20 -o /dev/null https://conta.studiotuts.com.br/conta
+          curl -fsS --retry 2 --retry-delay 15 --max-time 20 -o /dev/null https://vex.studiotuts.com.br/conta
           curl -fsS --retry 2 --retry-delay 15 --max-time 20 -o /dev/null https://admin.studiotuts.com.br/painel
 
       - name: Alertas (logins recusados e erros do servidor)
